@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dbarchiver"
+version = "1.0.0"
+authors = [
+    { name="Gabriele Sorci", email="gabrielesorci.25@gmail.com" }
+]
+description = "cli for backup and restore database"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3.10",
+    "License :: OSI Approved :: GNU License",
+    "Operating System :: POSIX :: Linux",
+]
+dependencies = [
+    "sshtunnel==0.4.0"
+]
+
+[project.optional-dependencies]
+tests = [
+    "pytest==7.4.3"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/gab-25/dbarchiver"
+"Bug Tracker" = "https://github.com/gab-25/dbarchiver/issues"
+
+[project.scripts]
+dbarchiver = "dbarchiver.__main__:main"
+
+[tool.black]
+line-length = 119
