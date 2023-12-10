@@ -1,12 +1,29 @@
 import argparse
 from sshtunnel import SSHTunnelForwarder
 from enum import Enum
+from dbarchiver.mongodb_client import MongodbClient
+from dbarchiver.postgresql_client import PostgresqlClient
+from dbarchiver.sqlite_client import SqliteClient
 
 
 class DatabaseType(Enum):
     POSTGRESQL = "postgresql"
     MONGODB = "mongodb"
     SQLITE = "sqlite"
+
+
+class DatabaseAction(Enum):
+    DUMP = "dump"
+    RESTORE = "restore"
+
+
+class DatabaseConnection:
+    def __init__(self, host: str, port: int, username: str, password: str, name: str):
+        self.host = host
+        self.port = port
+        self.username = username
+        self.password = password
+        self.name = name
 
 
 def create_ssh_tunnel(remote_host: str, remote_port: int) -> SSHTunnelForwarder:
@@ -22,32 +39,48 @@ def create_ssh_tunnel(remote_host: str, remote_port: int) -> SSHTunnelForwarder:
     )
 
 
-def __get_database_client(type: DatabaseType, host: str, port: int, name: str):
-    # TODO: call databse client
-    pass
+def __exec_action_database(action: DatabaseAction, type: DatabaseType, connection: DatabaseConnection):
+    try:
+        database_client = None
+        if type == DatabaseType.POSTGRESQL:
+            database_client = PostgresqlClient()
+        if type == DatabaseType.MONGODB:
+            database_client = MongodbClient()
+        if type == DatabaseType.SQLITE:
+            database_client = SqliteClient()
+
+        database_action = getattr(database_client, action.value)
+        database_action()
+    except Exception as ex:
+        print(ex)
 
 
-def connect_database(type: DatabaseType, host: str, port: int, name: str, ssh_tunnel: bool):
+def connect_database(action: DatabaseAction, type: DatabaseType, connection: DatabaseConnection, ssh_tunnel: bool):
     if ssh_tunnel:
-        server = create_ssh_tunnel(host, port)
+        server = create_ssh_tunnel(connection.host, connection.port)
         print("start ssh tunnel")
         server.start()
         print(server.local_bind_port)
-        __get_database_client(type, host, port, name)
+        __exec_action_database(action, type, connection)
         print("stop ssh tunnel")
         server.stop()
     else:
-        __get_database_client(type, host, port, name)
+        __exec_action_database(action, type, connection)
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("type", choices=[dt.value for dt in DatabaseType], help="type database")
-    parser.add_argument("--host", default="localhost", help="host database")
-    parser.add_argument("--port", default=5432, type=int, help="port database")
+    parser.add_argument("action", choices=[da.value for da in DatabaseAction], help="operation in database")
+    parser.add_argument("type", choices=[dt.value for dt in DatabaseType], help="software name database")
+    parser.add_argument("--host", default="localhost", help="host connection database")
+    parser.add_argument("--port", default=5432, type=int, help="port connection database")
+    parser.add_argument("--username", default="default", help="username connection database")
+    parser.add_argument("--password", default="default", help="password connection database")
     parser.add_argument("--name", default="default", help="name database")
     parser.add_argument("--ssh", action="store_true", dest="ssh_tunnel", help="use tunnel ssh")
     args = parser.parse_args()
+
+    args.action = DatabaseAction(args.action)
     args.type = DatabaseType(args.type)
 
     connect_database(**vars(args))
