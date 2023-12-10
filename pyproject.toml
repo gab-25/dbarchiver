@@ -32,5 +32,5 @@ tests = [
 [project.scripts]
 dbarchiver = "dbarchiver.__main__:main"
 
-[tool.black]
+[tool.ruff]
 line-length = 119
