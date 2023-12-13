@@ -1,6 +1,6 @@
 import argparse
-from sshtunnel import SSHTunnelForwarder
 from enum import Enum
+from sshtunnel import SSHTunnelForwarder
 from dbarchiver.mongodb_client import MongodbClient
 from dbarchiver.postgresql_client import PostgresqlClient
 from dbarchiver.sqlite_client import SqliteClient
@@ -18,12 +18,12 @@ class DatabaseAction(Enum):
 
 
 class DatabaseConnection:
-    def __init__(self, host: str, port: int, username: str, password: str, name: str):
+    def __init__(self, host: str, port: int, username: str, password: str, dbname: str):
         self.host = host
         self.port = port
         self.username = username
         self.password = password
-        self.name = name
+        self.dbname = dbname
 
 
 def create_ssh_tunnel(remote_host: str, remote_port: int) -> SSHTunnelForwarder:
@@ -43,11 +43,11 @@ def __exec_action_database(action: DatabaseAction, type: DatabaseType, connectio
     try:
         database_client = None
         if type == DatabaseType.POSTGRESQL:
-            database_client = PostgresqlClient()
+            database_client = PostgresqlClient(connection)
         if type == DatabaseType.MONGODB:
-            database_client = MongodbClient()
+            database_client = MongodbClient(connection)
         if type == DatabaseType.SQLITE:
-            database_client = SqliteClient()
+            database_client = SqliteClient(connection)
 
         database_action = getattr(database_client, action.value)
         database_action()
@@ -76,7 +76,7 @@ def main():
     parser.add_argument("--port", default=5432, type=int, help="port connection database")
     parser.add_argument("--username", default="default", help="username connection database")
     parser.add_argument("--password", default="default", help="password connection database")
-    parser.add_argument("--name", default="default", help="name database")
+    parser.add_argument("--dbname", default="default", help="name database")
     parser.add_argument("--ssh", action="store_true", dest="ssh_tunnel", help="use tunnel ssh")
     args = parser.parse_args()
 
