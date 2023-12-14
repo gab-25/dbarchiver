@@ -1,6 +1,7 @@
 import argparse
 from enum import Enum
 from sshtunnel import SSHTunnelForwarder
+from dbarchiver.database_connection import DatabaseConnection
 from dbarchiver.mongodb_client import MongodbClient
 from dbarchiver.postgresql_client import PostgresqlClient
 from dbarchiver.sqlite_client import SqliteClient
@@ -15,15 +16,6 @@ class DatabaseType(Enum):
 class DatabaseAction(Enum):
     DUMP = "dump"
     RESTORE = "restore"
-
-
-class DatabaseConnection:
-    def __init__(self, host: str, port: int, username: str, password: str, dbname: str):
-        self.host = host
-        self.port = port
-        self.username = username
-        self.password = password
-        self.dbname = dbname
 
 
 def create_ssh_tunnel(remote_host: str, remote_port: int) -> SSHTunnelForwarder:

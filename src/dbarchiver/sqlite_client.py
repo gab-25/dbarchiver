@@ -1,5 +1,5 @@
-from dbarchiver.__main__ import DatabaseConnection
 from dbarchiver.abstract_database_client import AbstractDatabseClient
+from dbarchiver.database_connection import DatabaseConnection
 
 
 class SqliteClient(AbstractDatabseClient):
