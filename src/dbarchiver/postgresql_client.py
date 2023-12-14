@@ -3,8 +3,8 @@ from dbarchiver.database_connection import DatabaseConnection
 
 
 class PostgresqlClient(AbstractDatabseClient):
-    def __init__(self, connection: DatabaseConnection):
-        super().__init__("pg_dump", "pg_restore")
+    def __init__(self, connection: DatabaseConnection, archive: str):
+        super().__init__("pg_dump", "pg_restore", archive)
 
     def dump(self):
         pass

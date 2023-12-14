@@ -3,8 +3,8 @@ from dbarchiver.database_connection import DatabaseConnection
 
 
 class SqliteClient(AbstractDatabseClient):
-    def __init__(self, connection: DatabaseConnection):
-        super().__init__("sqlite3", "sqlite3")
+    def __init__(self, connection: DatabaseConnection, archive):
+        super().__init__("sqlite3", "sqlite3", archive)
 
     def dump(self):
         pass

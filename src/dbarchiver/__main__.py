@@ -31,15 +31,15 @@ def create_ssh_tunnel(remote_host: str, remote_port: int) -> SSHTunnelForwarder:
     )
 
 
-def __exec_action_database(action: DatabaseAction, type: DatabaseType, connection: DatabaseConnection):
+def __exec_action_database(action: DatabaseAction, type: DatabaseType, connection: DatabaseConnection, archive: str):
     try:
         database_client = None
         if type == DatabaseType.POSTGRESQL:
-            database_client = PostgresqlClient(connection)
+            database_client = PostgresqlClient(connection, archive)
         if type == DatabaseType.MONGODB:
-            database_client = MongodbClient(connection)
+            database_client = MongodbClient(connection, archive)
         if type == DatabaseType.SQLITE:
-            database_client = SqliteClient(connection)
+            database_client = SqliteClient(connection, archive)
 
         database_action = getattr(database_client, action.value)
         database_action()
@@ -47,23 +47,24 @@ def __exec_action_database(action: DatabaseAction, type: DatabaseType, connectio
         print(ex)
 
 
-def connect_database(action: DatabaseAction, type: DatabaseType, connection: DatabaseConnection, ssh_tunnel: bool):
+def connect_database(action: DatabaseAction, type: DatabaseType, connection: DatabaseConnection, archive: str, ssh_tunnel: bool):
     if ssh_tunnel:
         server = create_ssh_tunnel(connection.host, connection.port)
         print("start ssh tunnel")
         server.start()
         print(server.local_bind_port)
-        __exec_action_database(action, type, connection)
+        __exec_action_database(action, type, connection, archive)
         print("stop ssh tunnel")
         server.stop()
     else:
-        __exec_action_database(action, type, connection)
+        __exec_action_database(action, type, connection, archive)
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("action", choices=[da.value for da in DatabaseAction], help="operation in database")
     parser.add_argument("type", choices=[dt.value for dt in DatabaseType], help="software name database")
+    parser.add_argument("archive", default=None, help="file archive database")
     parser.add_argument("--host", default="localhost", help="host connection database")
     parser.add_argument("--port", default=5432, type=int, help="port connection database")
     parser.add_argument("--username", default="default", help="username connection database")
