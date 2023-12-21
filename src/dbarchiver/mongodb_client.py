@@ -5,7 +5,7 @@ from dbarchiver.database_connection import DatabaseConnection
 
 class MongodbClient(AbstractDatabseClient):
     def __init__(self, connection: DatabaseConnection, archive: str):
-        super().__init__("mongodbdump", "mongorestore", connection, archive)
+        super().__init__("mongodump", "mongorestore", connection, archive)
 
     def dump(self):
         file_archive = self.archive if self.archive is not None else self.generate_file_archive(self.dbname)

@@ -47,7 +47,9 @@ def __exec_action_database(action: DatabaseAction, type: DatabaseType, connectio
         print(ex)
 
 
-def connect_database(action: DatabaseAction, type: DatabaseType, connection: DatabaseConnection, archive: str, ssh_tunnel: bool):
+def connect_database(
+    action: DatabaseAction, type: DatabaseType, connection: DatabaseConnection, archive: str, ssh_tunnel: bool
+):
     if ssh_tunnel:
         server = create_ssh_tunnel(connection.host, connection.port)
         print("start ssh tunnel")
@@ -73,10 +75,13 @@ def main():
     parser.add_argument("--ssh", action="store_true", dest="ssh_tunnel", help="use tunnel ssh")
     args = parser.parse_args()
 
-    args.action = DatabaseAction(args.action)
-    args.type = DatabaseType(args.type)
-
-    connect_database(**vars(args))
+    connect_database(
+        DatabaseAction(args.action),
+        DatabaseType(args.type),
+        DatabaseConnection(args.host, args.port, args.username, args.password, args.dbname),
+        args.archive,
+        args.ssh_tunnel,
+    )
 
 
 if __name__ == "__main__":
