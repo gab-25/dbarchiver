@@ -5,9 +5,8 @@ import subprocess
 
 
 class AbstractDatabseClient(ABC):
-    def __init__(self, dump_tool: str, restore_tool: str, file_archive: str):
+    def __init__(self, dump_tool: str, restore_tool: str):
         self.tools = {"dump": dump_tool, "restore": restore_tool}
-        self.file_archive = file_archive
         self.out_directory = os.path.expanduser("~").join("dumps")
 
         self.__check_tools()
@@ -30,8 +29,8 @@ class AbstractDatabseClient(ABC):
     def get_restore_tool(self) -> str:
         return self.tools.get("restore")
 
-    def generate_archive_filename(self, dbname: str):
-        return f"{dbname}_{datetime.datetime.today().strftime('%Y%m%d%H%M')}.dbarchive"
+    def generate_file_archive(self, dbname: str):
+        return f"{self.out_directory}/{dbname}_{datetime.datetime.today().strftime('%Y%m%d%H%M')}.dbarchive"
 
     @abstractmethod
     def dump(self):

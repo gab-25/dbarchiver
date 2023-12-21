@@ -5,16 +5,41 @@ from dbarchiver.database_connection import DatabaseConnection
 
 class MongodbClient(AbstractDatabseClient):
     def __init__(self, connection: DatabaseConnection, archive: str):
-        super().__init__("mongodbdump", "mongorestore", archive)
-        self.connectionString = (
-            f"mongodb://{connection.username@connection.password}:{connection.host}:{connection.port}/?AuthSource=admin"
-        )
+        super().__init__("mongodbdump", "mongorestore")
         self.dbname = connection.dbname
+        self.host = connection.host
+        self.port = connection.port
+        self.username = connection.username
+        self.password = connection.password
+        self.archive = archive
 
     def dump(self):
-        file_archive = f"{self.out_directory}/{self.generate_archive_filename(self.dbname)}" if not self.file_archive else self.file_archive
-        result = subprocess.run([self.get_dump_tool(), self.connectionString, f"--db={self.dbname}", 
-                                 f"--archive={file_archive}"])
+        file_archive = self.archive if self.archive is not None else self.generate_file_archive(self.dbname)
+        result = subprocess.run(
+            [
+                self.get_dump_tool(),
+                "--host={}".format(self.host),
+                "--port={}".format(self.port),
+                "--username={}".format(self.username),
+                "--password={}".format(self.password),
+                "--authenticationDatabase=admin",
+                "--db={}".format(self.dbname),
+                "--out={}".format(file_archive),
+            ]
+        )
 
     def restore(self):
-        result = subprocess.run([self.get_restore_tool(), self.connectionString, f"--db={self.dbname}", self.file_archive])
+        if self.archive is None:
+            raise Exception("file archive not found!")
+        result = subprocess.run(
+            [
+                self.get_restore_tool(),
+                "--host={}".format(self.host),
+                "--port={}".format(self.port),
+                "--username={}".format(self.username),
+                "--password={}".format(self.password),
+                "--authenticationDatabase=admin",
+                "--db={}".format(self.dbname),
+                "{}".format(self.archive),
+            ]
+        )
