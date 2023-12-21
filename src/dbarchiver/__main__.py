@@ -64,7 +64,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("action", choices=[da.value for da in DatabaseAction], help="operation in database")
     parser.add_argument("type", choices=[dt.value for dt in DatabaseType], help="software name database")
-    parser.add_argument("archive", default=None, help="file archive database")
+    parser.add_argument("--archive", default=None, help="file archive database")
     parser.add_argument("--host", default="localhost", help="host connection database")
     parser.add_argument("--port", default=5432, type=int, help="port connection database")
     parser.add_argument("--username", default="default", help="username connection database")

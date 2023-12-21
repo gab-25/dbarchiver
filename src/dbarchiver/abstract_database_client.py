@@ -3,10 +3,18 @@ import datetime
 import os
 import subprocess
 
+from dbarchiver.database_connection import DatabaseConnection
+
 
 class AbstractDatabseClient(ABC):
-    def __init__(self, dump_tool: str, restore_tool: str):
+    def __init__(self, dump_tool: str, restore_tool: str, connection: DatabaseConnection, archive: str):
         self.tools = {"dump": dump_tool, "restore": restore_tool}
+        self.dbname = connection.dbname
+        self.host = connection.host
+        self.port = connection.port
+        self.username = connection.username
+        self.password = connection.password
+        self.archive = archive
         self.out_directory = os.path.expanduser("~").join("dumps")
 
         self.__check_tools()
